@@ -2,7 +2,7 @@ import os.path
 import datasuper as ds
 
 
-class TypeNotFoundError( Exception):
+class RecipeNotFoundError( Exception):
     pass
 
 class Repo:
@@ -16,6 +16,14 @@ class Repo:
         self.dsRepo = dsRepo
 
 
+    def addRecipes(self, uri):
+        pass
+    
+    def makeRecipe(self, recipeName):
+        # check if we have the recipe
+        # if not throw an error
+        # else run it
+        
     def allDatabases(self):
         out =[]
         for database in self.dsRepo.sampleTable.getAll():

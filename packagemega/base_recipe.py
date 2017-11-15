@@ -1,11 +1,12 @@
-
+from .repo import Repo
 
 
 
 class BaseRecipe:
 
     def __init__(self):
-        # find the repo
+        self.repo = Repo.loadRepo()
+        
 
     
     def makeRecipe(self):

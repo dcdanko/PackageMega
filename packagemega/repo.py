@@ -1,28 +1,82 @@
 import os.path
 import datasuper as ds
-
+from os import listdir, symlink
+from shutil import copyfile
 
 class RecipeNotFoundError( Exception):
     pass
 
 class Repo:
     repoDirName = '.package_mega'
-    resultSchemaRoot = 'result-schemas.yml'
-    fileTypesRoot = 'file-types.yml'
-    sampleTypesRoot = 'sample-types.yml'
     
     def __init__(self, abspath, dsRepo):
         self.abspath = abspath
         self.dsRepo = dsRepo
+        self.recipeDir = os.path.join( self.abspath, 'recipes')
+        self.stagingDir = os.path.join( self.abspath, 'staging')        
+
+    def addRecipes(self, uri, dev=False):
+        if os.path.exists(self.uri):
+            return self.addFromLocal()
+        elif 'git' in self.uri:
+            return self.addFromGithub()
+    
+    def addFromLocal(self, uri, dev=False):
+        recipes = []
+        if uri[-9:] == 'recipe.py':
+            if dev:
+                symlink(f, self.recipeDir)
+            else:
+                copyfile(f, self.recipeDir)
+            return
+        
+        for f in listdir(uri):
+            if f[-9:] == 'recipe.py':
+                if dev:
+                    symlink(f, self.recipeDir)
+                else:
+                    copyfile(f, self.recipeDir)
+
+    def addFromGithub(self, uri):
+        hname = self.uri.split('/')[-1].split('.')[0]
+        dest = os.path.join( self.stagingDir, hname)
+        cmd = 'git clone {} {}'.format(self.uri, dest)
+        call(cmd, shell=True)
+        self.addFromLocal(dest)
 
 
-    def addRecipes(self, uri):
-        pass
+    def allRecipes(self):
+        out = set()
+        for recipe in listdir(self.recipeDir):
+            if recipe[-9:] == 'recipe.py':
+                out.add( recipe[:-9])
+        return out
     
     def makeRecipe(self, recipeName):
         # check if we have the recipe
         # if not throw an error
-        # else run it
+        if recipeName not in self.allRecipes():
+            raise RecipeNotFoundError()
+        # else run it 
+        recipe.makeRecipe()
+
+        
+    def _loadRecipe(self, recipeName):
+        # (sort of hacky)
+        fname = os.path.join( self.recipeDir, recipeName + 'recipe.py')
+        recipeStr = open(fname).read()
+        cname = None
+        for line in recipeStr.split('\n'):
+            if 'class' in line:
+                cname = line.split()[1]
+                cname.split(':')[0]
+                cname.split('(')[0]
+                break
+            
+        exec( recipeStr)
+        exec( 'recipe = {}()'.format(cname))
+        return recipe
+
         
     def allDatabases(self):
         out =[]

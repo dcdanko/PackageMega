@@ -1,27 +1,26 @@
 import setuptools
 
 setuptools.setup(
-    name="ModuleUltra",
+    name="PackageMega",
     version="0.1.0",
-    url="https://github.com/dcdanko/ModuleUltra",
+    url="https://github.com/dcdanko/PackageMega",
 
     author="David C. Danko",
     author_email="dcdanko@gmail.com",
 
-    description="Tools to make pipelines easier to run and distribute for large biological datasets",
+    description="Simple package manager to download and keep track of biological databases",
     long_description=open('README.rst').read(),
 
-    packages=['moduleultra'],
-    package_dir={'moduleultra': 'moduleultra'},
+    packages=['packagemega'],
+    package_dir={'packagemega': 'packagemega'},
 
     install_requires=[
         'click==6.7',
-        'snakemake==4.1.0'
     ],
 
     entry_points={
         'console_scripts': [
-            'moduleultra=moduleultra.cli:main'
+            'packagemega=packagemega.cli:main'
         ]
     },
 
@@ -29,6 +28,5 @@ setuptools.setup(
         'Development Status :: 2 - Pre-Alpha',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
     ],
 )

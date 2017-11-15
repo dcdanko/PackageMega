@@ -2,6 +2,9 @@ import os.path
 import datasuper as ds
 from os import listdir, symlink
 from shutil import copyfile
+import imp
+import sys
+import inspect
 
 class RecipeNotFoundError( Exception):
     pass
@@ -24,18 +27,18 @@ class Repo:
     def addFromLocal(self, uri, dev=False):
         recipes = []
         if uri[-9:] == 'recipe.py':
-            if dev:
-                symlink(f, self.recipeDir)
-            else:
-                copyfile(f, self.recipeDir)
-            return
-        
-        for f in listdir(uri):
+            fs = [uri]
+        else:
+            fs = listdir(uri)
+        for f in fs:
             if f[-9:] == 'recipe.py':
+                abs = os.path.abspath(f)
+                target = os.path.basename(f)
+                target = os.path.join(self.recipeDir, target)                
                 if dev:
-                    symlink(f, self.recipeDir)
+                    symlink(abs, target)
                 else:
-                    copyfile(f, self.recipeDir)
+                    copyfile(abs, target)
 
     def addFromGithub(self, uri):
         hname = self.uri.split('/')[-1].split('.')[0]
@@ -49,7 +52,11 @@ class Repo:
         out = set()
         for recipe in listdir(self.recipeDir):
             if recipe[-9:] == 'recipe.py':
-                out.add( recipe[:-9])
+                r = recipe[:-9]
+                if r[-1] in ['-', '_', '.']:
+                    r = r[:-1]
+                out.add( r)
+                
         return out
     
     def makeRecipe(self, recipeName):
@@ -57,37 +64,48 @@ class Repo:
         # if not throw an error
         if recipeName not in self.allRecipes():
             raise RecipeNotFoundError()
-        # else run it 
+        # else run it
+        recipe = self._loadRecipe(recipeName)
         recipe.makeRecipe()
 
         
     def _loadRecipe(self, recipeName):
         # (sort of hacky)
-        fname = os.path.join( self.recipeDir, recipeName + 'recipe.py')
+        for f in listdir(self.recipeDir):
+            if f[: len(recipeName)] == recipeName:
+                fname = os.path.join(self.recipeDir, f)
+                break
+        cname = self._getClassName( fname)
+        importName = os.path.basename(fname)[:-3]
+        
+        sys.path.append(os.path.dirname(fname))
+        __import__(importName)
+        classes = inspect.getmembers(sys.modules[importName], inspect.isclass)
+        for name, c in classes:
+            if name == cname:
+                return c()
+
+    def _getClassName(self, fname):
         recipeStr = open(fname).read()
         cname = None
         for line in recipeStr.split('\n'):
             if 'class' in line:
                 cname = line.split()[1]
-                cname.split(':')[0]
-                cname.split('(')[0]
+                cname = cname.split(':')[0]
+                cname = cname.split('(')[0]
                 break
-            
-        exec( recipeStr)
-        exec( 'recipe = {}()'.format(cname))
-        return recipe
-
+        return cname
         
     def allDatabases(self):
         out =[]
-        for database in self.dsRepo.sampleTable.getAll():
+        for database in self.dsRepo.db.sampleTable.getAll():
             out.append(database)
         return out
 
     def database(self, databaseName):
-        return self.dsRepo.sampleTable.get( databaseName)
+        return self.dsRepo.db.sampleTable.get( databaseName)
 
-    def saveFiles( recipe, subName, *filepaths):
+    def saveFiles(self, recipe, subName, *filepaths):
         with self.dsRepo as dsr:
             sample = ds.SampleRecord(dsr,
                                   name=recipe.name(),
@@ -115,7 +133,7 @@ class Repo:
         p = os.path.abspath(targetDir)
         try:
             dsRepo = ds.Repo.loadRepo(p)
-        except ds.NoRepoFoundError():
+        except FileNotFoundError:
             Repo._initRepo()
             return Repo.loadRepo()
         return Repo(p, dsRepo)
@@ -127,10 +145,11 @@ class Repo:
             targetDir = os.environ['PACKAGE_MEGA_HOME']
         except KeyError:
             targetDir = os.environ['HOME']
-        targetDir = os.path.join(targetDir, Repo.repoDirName)            
         p = os.path.abspath(targetDir)
         p = os.path.join(p, Repo.repoDirName)
         os.makedirs( p)
         ds.Repo.initRepo(targetDir=p)
-        
-                
+        r = os.path.join(p, 'recipes')
+        os.makedirs( r)
+        s = os.path.join(p, 'staging')        
+        os.makedirs( s)                

@@ -21,4 +21,4 @@ class SourceFile:
         self._filepath = actualFile
 
     def filepath(self):
-        return self._filepath()
+        return self._filepath

@@ -2,30 +2,31 @@ import os.path
 import datasuper as ds
 from os import listdir, symlink
 from shutil import copyfile
-import imp
 import sys
 import inspect
+from subproces import call
 
-class RecipeNotFoundError( Exception):
+
+class RecipeNotFoundError(Exception):
     pass
+
 
 class Repo:
     repoDirName = '.package_mega'
-    
+
     def __init__(self, abspath, dsRepo):
         self.abspath = abspath
         self.dsRepo = dsRepo
-        self.recipeDir = os.path.join( self.abspath, 'recipes')
-        self.stagingDir = os.path.join( self.abspath, 'staging')        
+        self.recipeDir = os.path.join(self.abspath, 'recipes')
+        self.stagingDir = os.path.join(self.abspath, 'staging')
 
     def addRecipes(self, uri, dev=False):
         if os.path.exists(self.uri):
             return self.addFromLocal()
         elif 'git' in self.uri:
             return self.addFromGithub()
-    
+
     def addFromLocal(self, uri, dev=False):
-        recipes = []
         if uri[-9:] == 'recipe.py':
             fs = [uri]
         else:
@@ -34,7 +35,7 @@ class Repo:
             if f[-9:] == 'recipe.py':
                 abs = os.path.abspath(f)
                 target = os.path.basename(f)
-                target = os.path.join(self.recipeDir, target)                
+                target = os.path.join(self.recipeDir, target)
                 if dev:
                     symlink(abs, target)
                 else:
@@ -42,11 +43,10 @@ class Repo:
 
     def addFromGithub(self, uri):
         hname = self.uri.split('/')[-1].split('.')[0]
-        dest = os.path.join( self.stagingDir, hname)
+        dest = os.path.join(self.stagingDir, hname)
         cmd = 'git clone {} {}'.format(self.uri, dest)
         call(cmd, shell=True)
         self.addFromLocal(dest)
-
 
     def allRecipes(self):
         out = set()
@@ -55,10 +55,9 @@ class Repo:
                 r = recipe[:-9]
                 if r[-1] in ['-', '_', '.']:
                     r = r[:-1]
-                out.add( r)
-                
+                out.add(r)
         return out
-    
+
     def makeRecipe(self, recipeName):
         # check if we have the recipe
         # if not throw an error
@@ -68,16 +67,15 @@ class Repo:
         recipe = self._loadRecipe(recipeName)
         recipe.makeRecipe()
 
-        
     def _loadRecipe(self, recipeName):
         # (sort of hacky)
         for f in listdir(self.recipeDir):
             if f[: len(recipeName)] == recipeName:
                 fname = os.path.join(self.recipeDir, f)
                 break
-        cname = self._getClassName( fname)
+        cname = self._getClassName(fname)
         importName = os.path.basename(fname)[:-3]
-        
+
         sys.path.append(os.path.dirname(fname))
         __import__(importName)
         classes = inspect.getmembers(sys.modules[importName], inspect.isclass)
@@ -95,32 +93,45 @@ class Repo:
                 cname = cname.split('(')[0]
                 break
         return cname
-        
+
+    def downloadDir(self):
+        try:
+            return os.environ['PACKAGE_MEGA_DOWNLOADS']
+        except KeyError:
+            try:
+                defaultDatabaseDir = os.path.join(self.abspath,
+                                                  'database_dir_location.txt')
+                defaultDatabaseDir = open(defaultDatabaseDir).read()
+                return defaultDatabaseDir
+            except FileNotFoundError:
+                defaultDatabaseDir = os.path.join(self.abspath, 'databases')
+                return defaultDatabaseDir
+
     def allDatabases(self):
-        out =[]
+        out = []
         for database in self.dsRepo.db.sampleTable.getAll():
             out.append(database)
         return out
 
     def database(self, databaseName):
-        return self.dsRepo.db.sampleTable.get( databaseName)
+        return self.dsRepo.db.sampleTable.get(databaseName)
 
     def saveFiles(self, recipe, subName, *filepaths):
         with self.dsRepo as dsr:
             sample = ds.SampleRecord(dsr,
-                                  name=recipe.name(),
-                                  sample_type='db')
+                                     name=recipe.name(),
+                                     sample_type='db')
             sample = sample.save(modify=True)
             for fType in recipe.fileTypes():
-                dsr.addFileType( fType)
+                dsr.addFileType(fType)
             schema = recipe.resultSchema[subName]
             dsr.addResultSchema(subName, schema)
             result = ds.ResultRecord(dsr,
-                                  name=subName,
-                                  result_type=subName,
-                                  file_records=filepaths)
+                                     name=subName,
+                                     result_type=subName,
+                                     file_records=filepaths)
             result.save(modify=True)
-            sample.addResult( result)
+            sample.addResult(result)
             sample.save(modify=True)
 
     @staticmethod
@@ -138,7 +149,6 @@ class Repo:
             return Repo.loadRepo()
         return Repo(p, dsRepo)
 
-        
     @staticmethod
     def _initRepo():
         try:
@@ -147,9 +157,11 @@ class Repo:
             targetDir = os.environ['HOME']
         p = os.path.abspath(targetDir)
         p = os.path.join(p, Repo.repoDirName)
-        os.makedirs( p)
+        os.makedirs(p)
         ds.Repo.initRepo(targetDir=p)
         r = os.path.join(p, 'recipes')
-        os.makedirs( r)
-        s = os.path.join(p, 'staging')        
-        os.makedirs( s)                
+        os.makedirs(r)
+        s = os.path.join(p, 'staging')
+        os.makedirs(s)
+        d = os.path.join(p, 'databases')
+        os.makedirs(d)

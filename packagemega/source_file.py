@@ -1,4 +1,6 @@
-
+from gimme_input import UserInput, BoolUserInput
+from subprocess import check_output
+import os.path
 
 
 class SourceFile:
@@ -7,12 +9,21 @@ class SourceFile:
         self.filename = filename
         self.url = url
         self._filepath = None
-        
+        self.repo = repo
+
     def _downloadFile(self):
-        pass
+        targetPath = os.path.join(self.repo.downloadDir(), self.filename)
+        cmd = 'wget {} -O {}'.format(self.url, targetPath)
+        check_output(cmd, shell=True)
+        return targetPath
 
     def _askUserForFile(self):
-        pass
+        _filepath = None
+        msg = 'Is {} already on this system?'.format(self.filename)
+        if BoolUserInput(msg, False).resolve():
+            msg = 'Please indicate where {} is stored'.format(self.filename)
+            _filepath = UserInput(msg).resolve()
+        return _filepath
 
     def resolve(self):
         actualFile = self._askUserForFile()

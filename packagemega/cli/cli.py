@@ -1,6 +1,7 @@
 import click
 from packagemega import Repo
 import sys
+from pyarchy import archy
 
 
 @click.group()
@@ -50,26 +51,27 @@ def viewDatabase(operands):
         for db in repo.allDatabases():
             print(db.name)
     for operand in operands:
-        operand = operand.split('.')
-        if len(operand) == 1:
-            db = repo.database(operand[0])
+        noperand = len(operand.split('.'))
+        if noperand == 1:
+            db = repo.database(operand)
+            print(db.tree())
+        elif noperand == 2:
+            dbName = operand.split('.')[0]
+            db = repo.database(dbName)
+            rs = {r.name: r for r in db.results()}
+            for k, v in rs.items():
+                if str(k) == operand:
+                    print(v.tree())
+        elif noperand == 3:
+            dbName = operand.split('.')[0]
+            db = repo.database(dbName)
+            fs = {}
             for r in db.results():
-                fs = [el[1].filepath() for el in r.files()]
-                o = '{}\t{}'.format(r.name, ' '.join(fs))
-                print(o)
-        if len(operand) == 2:
-            db = repo.database(operand[0])
-            rs = {r.resultType(): r for r in db.results()}
-            for  k, v in rs.items():
-                if str(k) == operand[1]:
-                    fs = v.files()
-                    if len(fs) == 1:
-                        print(fs[0][1].filepath())
-                    else:
-                        for fname, f in v.files():
-                            o = '{}\t{}'.format(fname, f.filepath())
-                            print(o)
-                    break
+                for k, f in r.files():
+                    fs[f.name] = f.filepath()
+            for k, v in fs.items():
+                if k == operand:
+                    print(v)
 
 
 ###############################################################################

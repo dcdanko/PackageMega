@@ -119,38 +119,44 @@ class Repo:
     def saveFiles(self, recipe, subName, *filepaths):
         with self.dsRepo as dsr:
             dsr.addSampleType('db')
-            sample = dsr.sampleTable.get(recipe.name())
-            '''
-            sample = ds.SampleRecord(dsr,
-                                     name=recipe.name(),
-                                     sample_type='db')
-            sample = sample.save(modify=True)
-            '''
+            try:
+                sample = dsr.sampleTable.get(recipe.name())
+            except KeyError:
+                sample = ds.SampleRecord(dsr,
+                                         name=recipe.name(),
+                                         sample_type='db')
+                sample = sample.save(modify=True)
+
             for fType in recipe.fileTypes():
                 dsr.addFileType(fType)
+
             fileRecs = []
-            for fpath in filepaths:
-                fr = dsr.fileTable.get(fpath)
-                '''
-                fr = ds.FileRecord(dsr,
-                                   name=fpath,
-                                   filepath=fpath,
-                                   file_type=subName)
-                fr.save(modify=True)
-                '''
-                fileRecs.append(fr)
+            rname = '{}.{}'.format(recipe.name(), subName)
+            for i, fpath in enumerate(filepaths):
+                fname = '{}.{}'.format(rname, i)
+                try:
+                    fr = dsr.fileTable.get(fname)
+                except KeyError:
+                    ftype = recipe.resultSchema()[subName]
+                    fr = ds.FileRecord(dsr,
+                                       name=fname,
+                                       filepath=fpath,
+                                       file_type=ftype)
+                    fr.save(modify=True)
+                fileRecs.append(fname)
 
             schema = recipe.resultSchema()[subName]
             dsr.addResultSchema(subName, schema)
-            result = dsr.resultTable.get(subName)
-            '''
-            result = ds.ResultRecord(dsr,
-                                     name=subName,
-                                     result_type=subName,
-                                     file_records=fileRecs)
-            print(result)
-            result.save(modify=True)
-            '''
+            try:
+                result = dsr.resultTable.get(rname)
+            except KeyError:
+                result = ds.ResultRecord(dsr,
+                                         name=rname,
+                                         result_type=subName,
+                                         file_records=fileRecs)
+
+                result = result.save(modify=True)
+
             sample.addResult(result)
             sample.save(modify=True)
 

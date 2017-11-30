@@ -4,7 +4,7 @@ from os import listdir, symlink
 from shutil import copyfile
 import sys
 import inspect
-from subproces import call
+from subprocess import call
 
 
 class RecipeNotFoundError(Exception):
@@ -118,19 +118,39 @@ class Repo:
 
     def saveFiles(self, recipe, subName, *filepaths):
         with self.dsRepo as dsr:
+            dsr.addSampleType('db')
+            sample = dsr.sampleTable.get(recipe.name())
+            '''
             sample = ds.SampleRecord(dsr,
                                      name=recipe.name(),
                                      sample_type='db')
             sample = sample.save(modify=True)
+            '''
             for fType in recipe.fileTypes():
                 dsr.addFileType(fType)
-            schema = recipe.resultSchema[subName]
+            fileRecs = []
+            for fpath in filepaths:
+                fr = dsr.fileTable.get(fpath)
+                '''
+                fr = ds.FileRecord(dsr,
+                                   name=fpath,
+                                   filepath=fpath,
+                                   file_type=subName)
+                fr.save(modify=True)
+                '''
+                fileRecs.append(fr)
+
+            schema = recipe.resultSchema()[subName]
             dsr.addResultSchema(subName, schema)
+            result = dsr.resultTable.get(subName)
+            '''
             result = ds.ResultRecord(dsr,
                                      name=subName,
                                      result_type=subName,
-                                     file_records=filepaths)
+                                     file_records=fileRecs)
+            print(result)
             result.save(modify=True)
+            '''
             sample.addResult(result)
             sample.save(modify=True)
 

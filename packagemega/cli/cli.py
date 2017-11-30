@@ -53,13 +53,22 @@ def viewDatabase(operands):
         operand = operand.split('.')
         if len(operand) == 1:
             db = repo.database(operand[0])
-            for f in db.files():
-                print(f)
+            for r in db.results():
+                fs = [el[1].filepath() for el in r.files()]
+                o = '{}\t{}'.format(r.name, ' '.join(fs))
+                print(o)
         if len(operand) == 2:
             db = repo.database(operand[0])
-            for k, v in db.files():
+            rs = {r.resultType(): r for r in db.results()}
+            for  k, v in rs.items():
                 if str(k) == operand[1]:
-                    print(v)
+                    fs = v.files()
+                    if len(fs) == 1:
+                        print(fs[0][1].filepath())
+                    else:
+                        for fname, f in v.files():
+                            o = '{}\t{}'.format(fname, f.filepath())
+                            print(o)
                     break
 
 

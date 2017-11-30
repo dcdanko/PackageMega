@@ -3,6 +3,10 @@ from subprocess import check_output
 import os.path
 
 
+class UnresolvableFileError(Exception):
+    pass
+
+
 class SourceFile:
 
     def __init__(self, repo, filename, url):
@@ -20,15 +24,17 @@ class SourceFile:
     def _askUserForFile(self):
         _filepath = None
         msg = 'Is {} already on this system?'.format(self.filename)
-        if BoolUserInput(msg, False).resolve():
+        if self.url is None or BoolUserInput(msg, False).resolve():
             msg = 'Please indicate where {} is stored'.format(self.filename)
             _filepath = UserInput(msg).resolve()
         return _filepath
 
     def resolve(self):
         actualFile = self._askUserForFile()
-        if actualFile is None:
+        if actualFile is None and self.url is not None:
             actualFile = self._downloadFile()
+        if actualFile is None:
+            raise UnresolvableFileError()
         self._filepath = actualFile
 
     def filepath(self):

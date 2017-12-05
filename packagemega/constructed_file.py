@@ -15,7 +15,7 @@ class ConstructedFile:
     def _askUserForFile(self):
         _filepath = None
         msg = 'Is {} already on this system?'.format(self.filename)
-        if self.url is None or BoolUserInput(msg, False).resolve():
+        if self.hook is None or BoolUserInput(msg, False).resolve():
             msg = 'Please indicate where {} is stored'.format(self.filename)
             _filepath = UserInput(msg).resolve()
         return _filepath

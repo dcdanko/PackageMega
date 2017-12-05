@@ -30,7 +30,7 @@ class Repo:
         if uri[-9:] == 'recipe.py':
             fs = [uri]
         else:
-            fs = listdir(uri)
+            fs = [os.path.join(uri, f) for f in listdir(uri)]
         out = []
         for f in fs:
             if f[-9:] == 'recipe.py':
@@ -56,7 +56,7 @@ class Repo:
             r = recipeFilename[:-9]
             if r[-1] in ['-', '_', '.']:
                 r = r[:-1]
-            return r
+            return os.path.basename(r)
         else:
             assert False and '{} is not a recipe'.format(recipeFilename)
 
@@ -74,7 +74,7 @@ class Repo:
         # check if we have the recipe
         # if not throw an error
         if recipeName not in self.allRecipes():
-            raise RecipeNotFoundError()
+            raise RecipeNotFoundError(recipeName)
         # else run it
         recipe = self._loadRecipe(recipeName)
         recipe.makeRecipe()
@@ -150,6 +150,8 @@ class Repo:
                     fr = dsr.fileTable.get(fname)
                 except KeyError:
                     ftype = recipe.resultSchema()[subName]
+                    if type(ftype) == list:
+                        ftype = ftype[i]
                     fr = ds.FileRecord(dsr,
                                        name=fname,
                                        filepath=fpath,

@@ -36,14 +36,14 @@ def view():
     pass
 
 
-@view.command(name='recipe')
+@main.command(name='recipe')
 def viewRecipes():
     repo = Repo.loadRepo()
     for recipe in repo.allRecipes():
         print(recipe)
 
 
-@view.command(name='database')
+@main.command(name='database')
 @click.argument('operands', nargs=-1)
 def viewDatabase(operands):
     repo = Repo.loadRepo()
@@ -63,6 +63,11 @@ def viewDatabase(operands):
                 if str(k) == operand:
                     print(v.tree())
         elif noperand == 3:
+            '''
+            should also accept 3 special commands: prefix, suffix, and dir
+
+            which return a shared <element> or fail if that does not exist
+            '''
             dbName = operand.split('.')[0]
             db = repo.database(dbName)
             fs = {}

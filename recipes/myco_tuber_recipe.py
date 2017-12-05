@@ -5,7 +5,7 @@ class MycoTuberRecipe(BaseRecipe):
 
     def __init__(self):
         super(MycoTuberRecipe, self).__init__()
-        self.source = SourceFile(self.repo, "mycobacterium_tubercoulosis.fna.gz", None)
+        self.source = SourceFile(self.repo, "mycobacterium_tubercoulosis.fna.gz")
 
     def name(self):
         return 'myco_tuber'

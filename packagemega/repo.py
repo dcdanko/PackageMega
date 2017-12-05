@@ -31,15 +31,18 @@ class Repo:
             fs = [uri]
         else:
             fs = listdir(uri)
+        out = []
         for f in fs:
             if f[-9:] == 'recipe.py':
-                abs = os.path.abspath(f)
+                absP = os.path.abspath(f)
                 target = os.path.basename(f)
                 target = os.path.join(self.recipeDir, target)
                 if dev:
-                    symlink(abs, target)
+                    symlink(absP, target)
                 else:
-                    copyfile(abs, target)
+                    copyfile(absP, target)
+                out.append(self._recipeName(f))
+        return out
 
     def addFromGithub(self, uri):
         hname = self.uri.split('/')[-1].split('.')[0]
@@ -48,14 +51,23 @@ class Repo:
         call(cmd, shell=True)
         self.addFromLocal(dest)
 
+    def _recipeName(self, recipeFilename):
+        if recipeFilename[-9:] == 'recipe.py':
+            r = recipeFilename[:-9]
+            if r[-1] in ['-', '_', '.']:
+                r = r[:-1]
+            return r
+        else:
+            assert False and '{} is not a recipe'.format(recipeFilename)
+
     def allRecipes(self):
         out = set()
         for recipe in listdir(self.recipeDir):
-            if recipe[-9:] == 'recipe.py':
-                r = recipe[:-9]
-                if r[-1] in ['-', '_', '.']:
-                    r = r[:-1]
+            try:
+                r = self._recipeName(recipe)
                 out.add(r)
+            except AssertionError:
+                pass
         return out
 
     def makeRecipe(self, recipeName):

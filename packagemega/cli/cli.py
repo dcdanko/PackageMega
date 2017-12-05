@@ -1,7 +1,5 @@
 import click
 from packagemega import Repo
-import sys
-from pyarchy import archy
 
 
 @click.group()

@@ -34,7 +34,7 @@ class SourceFile:
             actualFile = self._downloadFile()
         if actualFile is None:
             raise UnresolvableFileError()
-        self._filepath = actualFile
+        self._filepath = os.path.abspath(actualFile)
 
     def filepath(self):
         return self._filepath

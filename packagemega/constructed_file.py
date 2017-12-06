@@ -1,6 +1,6 @@
 from gimme_input import UserInput, BoolUserInput
 from .custom_errors import UnresolvableFileError
-
+import os.path
 
 class ConstructedFile:
 
@@ -26,7 +26,7 @@ class ConstructedFile:
             actualFile = self.hook()
         if actualFile is None:
             raise UnresolvableFileError()
-        self._filepath = actualFile
+        self._filepath = os.path.abspath(actualFile)
 
     def filepath(self):
         return self._filepath

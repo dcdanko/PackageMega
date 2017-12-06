@@ -130,7 +130,7 @@ class Repo:
 
     def saveFiles(self, recipe, subName, *filepaths, **kwFilepaths):
         fs = {}
-        for i, filepath in filepaths:
+        for i, filepath in enumerate(filepaths):
             fs[i] = filepath
         for k, v in kwFilepaths.items():
             fs[k] = v
@@ -144,12 +144,13 @@ class Repo:
                 fname = '{}.{}.{}'.format(recipe.name(), subName, i)
                 ftype = ftypes[key]
                 dsr.addFileType(ftype)
-                ds.getOrMakeFile(dsr, fname, ftype)
+                ds.getOrMakeFile(dsr, fname, fpath, ftype)
                 fileRecs.append(fname)
 
             dsr.addResultSchema(subName, schema)
             rname = '{}.{}'.format(recipe.name(), subName)
             result = ds.getOrMakeResult(dsr, rname, subName, fileRecs)
+            print(result)
 
             dsr.addSampleType('db')
             sample = ds.getOrMakeSample(dsr, recipe.name(), 'db')

@@ -128,51 +128,32 @@ class Repo:
     def database(self, databaseName):
         return self.dsRepo.db.sampleTable.get(databaseName)
 
-    def saveFiles(self, recipe, subName, *filepaths):
-        with self.dsRepo as dsr:
-            dsr.addSampleType('db')
-            try:
-                sample = dsr.sampleTable.get(recipe.name())
-            except KeyError:
-                sample = ds.SampleRecord(dsr,
-                                         name=recipe.name(),
-                                         sample_type='db')
-                sample = sample.save(modify=True)
+    def saveFiles(self, recipe, subName, *filepaths, **kwFilepaths):
+        fs = {}
+        for i, filepath in filepaths:
+            fs[i] = filepath
+        for k, v in kwFilepaths.items():
+            fs[k] = v
 
-            for fType in recipe.fileTypes():
-                dsr.addFileType(fType)
+        with self.dsRepo as dsr:
+            schema = recipe.resultSchema()[subName]
 
             fileRecs = []
-            rname = '{}.{}'.format(recipe.name(), subName)
-            for i, fpath in enumerate(filepaths):
-                fname = '{}.{}'.format(rname, i)
-                try:
-                    fr = dsr.fileTable.get(fname)
-                except KeyError:
-                    ftype = recipe.resultSchema()[subName]
-                    if type(ftype) == list:
-                        ftype = ftype[i]
-                    fr = ds.FileRecord(dsr,
-                                       name=fname,
-                                       filepath=fpath,
-                                       file_type=ftype)
-                    fr.save(modify=True)
+            ftypes = dictify(schema)
+            for key, fpath in fs.items():
+                fname = '{}.{}.{}'.format(recipe.name(), subName, i)
+                ftype = ftypes[key]
+                dsr.addFileType(ftype)
+                ds.getOrMakeFile(dsr, fname, ftype)
                 fileRecs.append(fname)
 
-            schema = recipe.resultSchema()[subName]
             dsr.addResultSchema(subName, schema)
-            try:
-                result = dsr.resultTable.get(rname)
-            except KeyError:
-                result = ds.ResultRecord(dsr,
-                                         name=rname,
-                                         result_type=subName,
-                                         file_records=fileRecs)
+            rname = '{}.{}'.format(recipe.name(), subName)
+            result = ds.getOrMakeResult(dsr, rname, subName, fileRecs)
 
-                result = result.save(modify=True)
-
-            sample.addResult(result)
-            sample.save(modify=True)
+            dsr.addSampleType('db')
+            sample = ds.getOrMakeSample(dsr, recipe.name(), 'db')
+            sample.addResult(result).save(modify=True)
 
     @staticmethod
     def loadRepo():
@@ -205,3 +186,12 @@ class Repo:
         os.makedirs(s)
         d = os.path.join(p, 'databases')
         os.makedirs(d)
+
+
+def dictify(el):
+    if type(el) == list:
+        return {i: sub for i, sub in enumerate(el)}
+    elif type(el) == dict:
+        return el
+    else:
+        return {0: el}

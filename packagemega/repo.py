@@ -144,7 +144,7 @@ class Repo:
                 fname = '{}.{}.{}'.format(recipe.name(), subName, i)
                 ftype = ftypes[key]
                 dsr.addFileType(ftype)
-                ds.getOrMakeFile(dsr, fname, fpath, ftype)
+                ds.makeFile(dsr, fname, ftype, modify=True)
                 fileRecs.append(fname)
 
             dsr.addResultSchema(subName, schema)

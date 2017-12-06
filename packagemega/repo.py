@@ -14,9 +14,8 @@ class RecipeNotFoundError(Exception):
 class Repo:
     repoDirName = '.package_mega'
 
-    def __init__(self, abspath, dsRepo):
+    def __init__(self, abspath):
         self.abspath = abspath
-        self.dsRepo = dsRepo
         self.recipeDir = os.path.join(self.abspath, 'recipes')
         self.stagingDir = os.path.join(self.abspath, 'staging')
 
@@ -121,12 +120,12 @@ class Repo:
 
     def allDatabases(self):
         out = []
-        for database in self.dsRepo.db.sampleTable.getAll():
+        for database in self.dsRepo().sampleTable.getAll():
             out.append(database)
         return out
 
     def database(self, databaseName):
-        return self.dsRepo.db.sampleTable.get(databaseName)
+        return self.dsRepo().sampleTable.get(databaseName)
 
     def saveFiles(self, recipe, subName, *filepaths, **kwFilepaths):
         fs = {}
@@ -135,13 +134,14 @@ class Repo:
         for k, v in kwFilepaths.items():
             fs[k] = v
 
-        with self.dsRepo as dsr:
+        with  self.dsRepo() as dsr:
             schema = recipe.resultSchema()[subName]
 
             fileRecs = []
             ftypes = dictify(schema)
             for key, fpath in fs.items():
-                fname = '{}.{}.{}'.format(recipe.name(), subName, i)
+                fname = '{}.{}.{}'.format(recipe.name(), subName, key)
+                print('{} {}'.format(fname, fpath))
                 ftype = ftypes[key]
                 dsr.addFileType(ftype)
                 ds.makeFile(dsr, fname, fpath, ftype, modify=True)
@@ -150,12 +150,15 @@ class Repo:
             dsr.addResultSchema(subName, schema)
             rname = '{}.{}'.format(recipe.name(), subName)
             result = ds.getOrMakeResult(dsr, rname, subName, fileRecs)
-            print(result)
 
             dsr.addSampleType('db')
             sample = ds.getOrMakeSample(dsr, recipe.name(), 'db')
             sample.addResult(result).save(modify=True)
 
+    
+    def dsRepo(self):
+        return ds.Repo.loadRepo(self.abspath)
+        
     @staticmethod
     def loadRepo():
         try:
@@ -169,7 +172,7 @@ class Repo:
         except FileNotFoundError:
             Repo._initRepo()
             return Repo.loadRepo()
-        return Repo(p, dsRepo)
+        return Repo(p)
 
     @staticmethod
     def _initRepo():

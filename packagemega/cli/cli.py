@@ -47,7 +47,8 @@ def viewRecipes():
 
 def filePrefix(fs):
     out = ''
-    for i in min([len(fpath for fpath in fs.values())]):
+    ls = [len(fpath) for fpath in fs.values()]
+    for i in range(min(ls)):
         cs = [fpath[i] for fpath in fs.values()]
         consensus = True
         for j in range(len(cs) - 1):
@@ -58,6 +59,8 @@ def filePrefix(fs):
             out += cs[0]
         else:
             break
+    if out[-1] == '.':
+        out = out[:-1]
     return out
 
 
@@ -83,6 +86,8 @@ def processFullOperand(db, operand, subops):
     '''
     fs = {}
     for r in db.results():
+        if r.name != '.'.join(subops[:2]):
+            continue
         for k, f in r.files():
             fs[f.name] = f.filepath()
     if subops[2] == 'prefix':
@@ -99,7 +104,7 @@ def processFullOperand(db, operand, subops):
 def processOperand(repo, operand):
     subops = operand.split('.')
     oplevel = len(subops)
-    db = repo.database(operand)
+    db = repo.database(subops[0])
     if oplevel == 1:
         print(db.tree())
     elif oplevel == 2:

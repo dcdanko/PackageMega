@@ -98,7 +98,10 @@ def processFullOperand(db, operand, subops):
         try:
             print(fs[subops[2]])
         except KeyError:
-            print('{} not found.'.format(operand), file=sys.stderr)
+            try:
+                print(fs[operand])
+            except KeyError:
+                print('{} not found.'.format(operand), file=sys.stderr)
 
 
 def processOperand(repo, operand):

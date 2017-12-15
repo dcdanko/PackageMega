@@ -61,7 +61,6 @@ def _processFullOperand(db, operand, subops):
                 raise UnresolvableOperandError(operand)
 
 
-
 def processOperand(repo, operand, stringify=False):
     subops = operand.split('.')
     oplevel = len(subops)

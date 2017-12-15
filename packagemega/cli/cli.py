@@ -1,7 +1,8 @@
 import click
 from packagemega import Repo
 import sys
-import os.path
+from packagemega.mini_language import processOperand
+from .custom_errors import UnresolvableOperandError
 
 
 @click.group()
@@ -45,77 +46,6 @@ def viewRecipes():
 ###############################################################################
 
 
-def filePrefix(fs):
-    out = ''
-    ls = [len(fpath) for fpath in fs.values()]
-    for i in range(min(ls)):
-        cs = [fpath[i] for fpath in fs.values()]
-        consensus = True
-        for j in range(len(cs) - 1):
-            if cs[j] != cs[j + 1]:
-                consensus = False
-                break
-        if consensus:
-            out += cs[0]
-        else:
-            break
-    if out[-1] == '.':
-        out = out[:-1]
-    return out
-
-
-def fileDir(fs):
-    fdirs = [os.path.dirname(fpath) for fpath in fs.values()]
-    consensus = True
-    if len(fdirs) > 1:
-        for a, b in zip(fdirs[1:], fdirs[:-1]):
-            if a != b:
-                consensus = False
-                break
-    if consensus:
-        return fdirs[0]
-    return ''
-
-
-def processFullOperand(db, operand, subops):
-    '''
-    Returns a filepath based on <database>.<item>.<file>
-
-    should also accept 2 special commands for <file>: prefix and dir
-    which return a shared <element> or fail if that does not exist
-    '''
-    fs = {}
-    for r in db.results():
-        if r.name != '.'.join(subops[:2]):
-            continue
-        for k, f in r.files():
-            fs[f.name] = f.filepath()
-    if subops[2] == 'prefix':
-        print(filePrefix(fs))
-    elif subops[2] == 'dir':
-        print(fileDir(fs))
-    else:
-        try:
-            print(fs[subops[2]])
-        except KeyError:
-            print('{} not found.'.format(operand), file=sys.stderr)
-
-
-def processOperand(repo, operand):
-    subops = operand.split('.')
-    oplevel = len(subops)
-    db = repo.database(subops[0])
-    if oplevel == 1:
-        print(db.tree())
-    elif oplevel == 2:
-        rs = {r.name: r for r in db.results()}
-        for k, v in rs.items():
-            if str(k) == operand:
-                    print(v.tree())
-    elif oplevel == 3:
-        processFullOperand(db, operand, subops)
-
-
 def printAllDatabases(repo):
     for db in repo.allDatabases():
         print(db.name)
@@ -128,7 +58,11 @@ def viewDatabase(operands):
     if len(operands) == 0:
         printAllDatabases(repo)
     for operand in operands:
-        processOperand(repo, operand)
+        try:
+            el = processOperand(repo, operand, stringify=True)
+            print(el)
+        except UnresolvableOperandError:
+            print('{} could not be resolved.'.format(operand), file=sys.stderr)
 
 
 ###############################################################################

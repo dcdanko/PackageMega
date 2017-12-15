@@ -55,7 +55,11 @@ def _processFullOperand(db, operand, subops):
         try:
             return fs[subops[2]]
         except KeyError:
-            raise UnresolvableOperandError(operand)
+            try:
+                return fs[operand]
+            except KeyError:
+                raise UnresolvableOperandError(operand)
+
 
 
 def processOperand(repo, operand, stringify=False):

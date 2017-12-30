@@ -37,7 +37,10 @@ class Repo:
                 target = os.path.basename(f)
                 target = os.path.join(self.recipeDir, target)
                 if dev:
-                    symlink(absP, target)
+                    try:
+                        symlink(absP, target)
+                    except FileExistsError:
+                        pass
                 else:
                     copyfile(absP, target)
                 out.append(self._recipeName(f))

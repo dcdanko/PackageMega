@@ -2,7 +2,7 @@ import click
 from packagemega import Repo
 import sys
 from packagemega.mini_language import processOperand
-from .custom_errors import UnresolvableOperandError
+from packagemega.custom_errors import UnresolvableOperandError
 
 
 @click.group()

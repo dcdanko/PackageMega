@@ -22,16 +22,29 @@ def _filePrefix(fs):
 
 
 def _fileDir(fs):
-    fdirs = [os.path.dirname(fpath) for fpath in fs.values()]
-    consensus = True
-    if len(fdirs) > 1:
-        for a, b in zip(fdirs[1:], fdirs[:-1]):
-            if a != b:
-                consensus = False
+    if len(fs) == 1:
+        return os.path.dirname(fs.values()[0])
+    sections = []
+    for path in fs.values():
+        for i, section in enumerate(path.split('/')):
+            while len(sections) <= i:
+                sections.append([])
+            sections[i].append(section)
+
+    consensus = []
+    for section in sections:
+        inconsensus = True
+        for other in section[1:]:
+            if other != section[0]:
+                inconsensus = False
                 break
-    if consensus:
-        return fdirs[0]
-    return ''
+        if inconsensus:
+            consensus.append(section[0])
+
+    fdir = '/'.join(consensus)
+    if fdir[0] != '/':
+        fdir = '/' + fdir
+    return fdir
 
 
 def _processFullOperand(db, operand, subops):

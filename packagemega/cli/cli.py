@@ -3,7 +3,6 @@ from packagemega import Repo
 import sys
 from packagemega.mini_language import processOperand
 from packagemega.custom_errors import UnresolvableOperandError
-from datasuper import InvalidRecordStateError
 
 
 @click.group()
@@ -13,20 +12,13 @@ def main():
 
 ###############################################################################
 
-def tableStatus(tbl, name):
+
+def tableStatus(tblName, statusMap):
     '''Check if records in a table are valid and print a report to stdout.'''
-    ngrps = tbl.size()
-    grps = tbl.getAllLazily()
-    sys.stdout.write('\n{} {}... '.format(ngrps, name))
+    sys.stdout.write('\n{} {}... '.format(len(statusMap), tblName))
     allGood = True
-    for name, grp in grps:
-        try:
-            grp = grp()
-        except InvalidRecordStateError:
-            allGood = False
-            sys.stdout.write('\n - {} failed'.format(name))
-            continue
-        if not grp.validStatus():
+    for name, status in statusMap.items():
+        if not status:
             allGood = False
             sys.stdout.write('\n - {} failed'.format(name))
     if allGood:
@@ -37,9 +29,8 @@ def tableStatus(tbl, name):
 def status():
     repo = Repo.loadRepo()
     sys.stdout.write('Checking status')
-    tableStatus(repo.db.sampleTable, 'databases')
-    tableStatus(repo.db.resultTable, 'sub-databases')
-    tableStatus(repo.db.fileTable, 'files')
+    for tblName, statusMap in repo.dbStatus().items():
+        tableStatus(tblName, statusMap)
     sys.stdout.write('\nDone\n')
 
 ###############################################################################

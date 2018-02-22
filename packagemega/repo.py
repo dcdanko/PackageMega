@@ -130,6 +130,9 @@ class Repo:
     def database(self, databaseName):
         return self.dsRepo().sampleTable.get(databaseName)
 
+    def dbStatus(self):
+        return self.dsRepo().checkStatus()
+
     def saveFiles(self, recipe, subName, *filepaths, **kwFilepaths):
         fs = {}
         for i, filepath in enumerate(filepaths):
@@ -137,7 +140,7 @@ class Repo:
         for k, v in kwFilepaths.items():
             fs[k] = v
 
-        with  self.dsRepo() as dsr:
+        with self.dsRepo() as dsr:
             schema = recipe.resultSchema()[subName]
 
             fileRecs = []

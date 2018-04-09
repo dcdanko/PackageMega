@@ -153,9 +153,10 @@ class Repo:
                 ds.makeFile(dsr, fname, fpath, ftype, modify=True)
                 fileRecs.append(fname)
 
-            dsr.addResultSchema(subName, schema)
+            schemaName = '{}::{}'.format(recipe.name(), subName)
+            dsr.addResultSchema(schemaName, schema)
             rname = '{}.{}'.format(recipe.name(), subName)
-            result = ds.getOrMakeResult(dsr, rname, subName, fileRecs)
+            result = ds.getOrMakeResult(dsr, rname, schemaName, fileRecs)
 
             dsr.addSampleType('db')
             sample = ds.getOrMakeSample(dsr, recipe.name(), 'db')

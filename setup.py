@@ -1,7 +1,8 @@
+"""PackageMega -- package manager for biological databases."""
 
 from setuptools import setup, find_packages
 
-setuptools.setup(
+setup(
     name='PackageMega',
     version='0.1.0',
     url='https://github.com/dcdanko/PackageMega',

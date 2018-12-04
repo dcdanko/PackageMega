@@ -1,21 +1,24 @@
-import setuptools
+
+from setuptools import setup, find_packages
 
 setuptools.setup(
-    name="PackageMega",
-    version="0.1.0",
-    url="https://github.com/dcdanko/PackageMega",
+    name='PackageMega',
+    version='0.1.0',
+    url='https://github.com/dcdanko/PackageMega',
 
-    author="David C. Danko",
-    author_email="dcdanko@gmail.com",
+    author='David C. Danko',
+    author_email='dcdanko@gmail.com',
 
-    description="Simple package manager to download and keep track of biological databases",
+    description='Simple package manager to download and keep track of biological databases.',
     long_description=open('README.rst').read(),
 
-    packages=['packagemega'],
+    packages=find_packages(),
     package_dir={'packagemega': 'packagemega'},
 
     install_requires=[
-        'click==6.7',
+        'click~=6.7',
+        'DataSuper~=0.10.0',
+        'gimme_input~=1.0.0',
     ],
 
     entry_points={

@@ -1,46 +1,30 @@
-ModuleUltra
+PackageMega
 =========
 
-.. image:: https://img.shields.io/pypi/v/ModuleUltra.svg
-    :target: https://pypi.python.org/pypi/ModuleUltra
-    :alt: Latest PyPI version
+|CircleCI master| |PyPI latest version| |PyPI Python version| |PyPI downloads| |GitHub license|
 
-Easy to use pipelines for large biological datasets.
+Simple package manager to download and keep track of biological databases.
 
 Goals
 -----
 
-Bioinformatics pipelines often involve a large number of files with complex organization and metadata, complex paths, and lots of dependencies. ModuleUltra is intended to make it easier run and distribute complex pipelines. It is built on top of DataSuper and SnakeMake. ModuleUltra defines both an API and CLI. 
+PackageMega is used to distribute `ModuleUltra <https://github.com/dcdanko/ModuleUltra>`_ pipelines.
 
-ModuleUltra is probably overkill for small projects, it has been designed in particular for the MetaSUB project which has thousands of samples and complex analysis pipelines. ModuleUltra makes it easier to do consistent analysis on thousands of samples across many sites.
-
-MetaSUB is also developing a program called DataSuper which tracks complex data and metadata.
-
-In summary:
- - ModuleUltra makes it easy to install complex pipelines
- - ModuleUltra makes it easy to run pipelines only on slected subsets of the data
- - ModuleUltra makes it easy to run parts of large complex pipelines
- - ModuleUltra automatically tracks output of pipelines in DataSuper
- - ModuleUltra allows you to write most of your pipelines logic in SnakeMake, a popular pipeline system
- - ModuleUltra reduces the amount of boilerplate code necessary to make a pipeline
-
-ModuleUltra is intended to improve reproducibility, features are being added to improve file provenance.
+See `recipes <./recipes/>`_ for examples.
 
 Installation
 ------------
 
-Be aware that ModuleUltra is still an Alpha. There are still bugs and some unimplemented features.
+Be aware that PackageMega is still an Alpha. There are still bugs and some unimplemented features.
 
-ModuleUltra is currently being used on Ubuntu and RHEL systems. It should work on any *nix system.
+PackageMega is currently being used on Ubuntu and RHEL systems. It should work on any *nix system.
 
 To install:
 
 
 .. code-block:: bash
-   
-    git clone <url>   
 
-    python setup.py develop
+    pip install packagemega
 
 
 Licence
@@ -51,3 +35,20 @@ Authors
 -------
 
 `ModuleUltra` was written by `David C. Danko <dcdanko@gmail.com>`_.
+
+
+.. |CircleCI master| image:: https://img.shields.io/circleci/project/github/dcdanko/PackageMega/master.svg
+    :alt: CircleCI master
+
+.. |PyPI latest version| image:: https://img.shields.io/pypi/v/PackageMega.svg
+    :target: https://pypi.python.org/pypi/PackageMega
+    :alt: Latest PyPI version
+
+.. |PyPI Python version| image:: https://img.shields.io/pypi/pyversions/PackageMega.svg
+    :alt: PyPI - Python version
+
+.. |PyPI downloads| image:: https://img.shields.io/pypi/dm/PackageMega.svg
+    :alt: PyPI - Downloads
+
+.. |GitHub license| image:: https://img.shields.io/github/license/dcdanko/PackageMega.svg
+    :alt: GitHub license

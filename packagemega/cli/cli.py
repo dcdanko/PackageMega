@@ -1,11 +1,22 @@
+"""CLI command definitions."""
+
+import os
+import sys
+
 import click
 from packagemega import Repo
-import sys
 from packagemega.mini_language import processOperand
 from packagemega.custom_errors import UnresolvableOperandError
 
 
+version = {}
+version_path = os.path.join(os.path.dirname(__file__), '../version.py')
+with open(version_path) as version_file:
+    exec(version_file.read(), version)
+
+
 @click.group()
+@click.version_option(version['__version__'])
 def main():
     pass
 

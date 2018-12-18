@@ -1,14 +1,15 @@
+"""PackageMega repository class."""
+
+import inspect
 import os.path
-import datasuper as ds
 from os import listdir, symlink
 from shutil import copyfile
-import sys
-import inspect
 from subprocess import call
+import sys
 
+import datasuper as ds
 
-class RecipeNotFoundError(Exception):
-    pass
+from .custom_errors import RecipeNotFoundError, InvalidRecipeURI
 
 
 class Repo:
@@ -20,10 +21,13 @@ class Repo:
         self.stagingDir = os.path.join(self.abspath, 'staging')
 
     def addRecipes(self, uri, dev=False):
-        if os.path.exists(self.uri):
-            return self.addFromLocal()
-        elif 'git' in self.uri:
-            return self.addFromGithub()
+        if os.path.exists(uri):
+            return self.addFromLocal(uri)
+
+        if 'git' in uri:
+            return self.addFromGithub(uri)
+
+        raise InvalidRecipeURI(uri)
 
     def addFromLocal(self, uri, dev=False):
         if uri[-9:] == 'recipe.py':
@@ -47,9 +51,9 @@ class Repo:
         return out
 
     def addFromGithub(self, uri):
-        hname = self.uri.split('/')[-1].split('.')[0]
+        hname = uri.split('/')[-1].split('.')[0]
         dest = os.path.join(self.stagingDir, hname)
-        cmd = 'git clone {} {}'.format(self.uri, dest)
+        cmd = 'git clone {} {}'.format(uri, dest)
         call(cmd, shell=True)
         self.addFromLocal(dest)
 
@@ -59,8 +63,8 @@ class Repo:
             if r[-1] in ['-', '_', '.']:
                 r = r[:-1]
             return os.path.basename(r)
-        else:
-            assert False and '{} is not a recipe'.format(recipeFilename)
+
+        raise InvalidRecipeURI('{} is not a recipe'.format(recipeFilename))
 
     def allRecipes(self):
         out = set()
@@ -96,6 +100,8 @@ class Repo:
         for name, c in classes:
             if name == cname:
                 return c()
+
+        raise RecipeNotFoundError(recipeName)
 
     def _getClassName(self, fname):
         recipeStr = open(fname).read()
@@ -162,10 +168,9 @@ class Repo:
             sample = ds.getOrMakeSample(dsr, recipe.name(), 'db')
             sample.addResult(result).save(modify=True)
 
-    
     def dsRepo(self):
         return ds.Repo.loadRepo(self.abspath)
-        
+
     @staticmethod
     def loadRepo():
         try:
@@ -175,7 +180,7 @@ class Repo:
         targetDir = os.path.join(targetDir, Repo.repoDirName)
         p = os.path.abspath(targetDir)
         try:
-            dsRepo = ds.Repo.loadRepo(p)
+            _ = ds.Repo.loadRepo(p)
         except FileNotFoundError:
             Repo._initRepo()
             return Repo.loadRepo()
@@ -202,7 +207,6 @@ class Repo:
 def dictify(el):
     if type(el) == list:
         return {i: sub for i, sub in enumerate(el)}
-    elif type(el) == dict:
+    if type(el) == dict:
         return el
-    else:
-        return {0: el}
+    return {0: el}

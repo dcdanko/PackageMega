@@ -1,18 +1,17 @@
-from gimme_input import UserInput, BoolUserInput
-from subprocess import check_output
+
 import os.path
+from subprocess import check_output
+from gimme_input import UserInput, BoolUserInput
+
 from .custom_errors import UnresolvableFileError
+from .file import PMFile
 
 
-class SourceFile:
+class SourceFile(PMFile):
 
-    def __init__(self, repo, filename, *args):
-        self.filename = filename
-        self.url = None
-        if len(args) > 0:
-            self.url = args[0]
-        self._filepath = None
-        self.repo = repo
+    def __init__(self, *args, url=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url = url
 
     def _downloadFile(self):
         targetPath = os.path.join(self.repo.downloadDir(), self.filename)
@@ -20,21 +19,10 @@ class SourceFile:
         check_output(cmd, shell=True)
         return targetPath
 
-    def _askUserForFile(self):
-        _filepath = None
-        msg = 'Is {} already on this system?'.format(self.filename)
-        if self.url is None or BoolUserInput(msg, False).resolve():
-            msg = 'Please indicate where {} is stored'.format(self.filename)
-            _filepath = UserInput(msg).resolve()
-        return _filepath
+    def _resolver(self):
+        """Return file url."""
+        return self.url
 
-    def resolve(self):
-        actualFile = self._askUserForFile()
-        if actualFile is None and self.url is not None:
-            actualFile = self._downloadFile()
-        if actualFile is None:
-            raise UnresolvableFileError()
-        self._filepath = os.path.abspath(actualFile)
-
-    def filepath(self):
-        return self._filepath
+    def _resolve_actual_file(self):
+        """Resolve file by downloading it."""
+        return self._downloadFile()

@@ -12,7 +12,7 @@ from packagemega.custom_errors import UnresolvableOperandError
 version = {}
 version_path = os.path.join(os.path.dirname(__file__), '../version.py')
 with open(version_path) as version_file:
-    exec(version_file.read(), version)
+    exec(version_file.read(), version)  # pylint: disable=exec-used
 
 
 @click.group()
@@ -25,7 +25,7 @@ def main():
 
 
 def tableStatus(tblName, statusMap):
-    '''Check if records in a table are valid and print a report to stdout.'''
+    """Check if records in a table are valid and print a report to stdout."""
     sys.stdout.write('\n{} {}... '.format(len(statusMap), tblName))
     allGood = True
     for name, status in statusMap.items():
@@ -36,8 +36,8 @@ def tableStatus(tblName, statusMap):
         sys.stdout.write('all good.')
 
 
-@main.command()
-def status():
+@main.command(name='status')
+def pm_status():
     repo = Repo.loadRepo()
     sys.stdout.write('Checking status')
     for tblName, statusMap in repo.dbStatus().items():

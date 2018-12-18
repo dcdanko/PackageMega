@@ -1,5 +1,7 @@
+
+
 import os.path
-from .custom_errors import UnresolvableOperandError
+from .custom_errors import UnresolvableOperandError, UnresolvableOperandLevel
 
 
 def _filePrefix(fs):
@@ -48,30 +50,31 @@ def _fileDir(fs):
 
 
 def _processFullOperand(db, operand, subops):
-    '''
+    """
     Returns a filepath based on <database>.<item>.<file>
 
     should also accept 2 special commands for <file>: prefix and dir
     which return a shared <element> or fail if that does not exist
-    '''
+    """
     fs = {}
     for r in db.results():
         if r.name != '.'.join(subops[:2]):
             continue
-        for k, f in r.files():
+        for _, f in r.files():
             fs[f.name] = f.filepath()
+
     if subops[2] == 'prefix':
         return _filePrefix(fs)
-    elif subops[2] == 'dir':
+    if subops[2] == 'dir':
         return _fileDir(fs)
-    else:
+
+    try:
+        return fs[subops[2]]
+    except KeyError:
         try:
-            return fs[subops[2]]
+            return fs[operand]
         except KeyError:
-            try:
-                return fs[operand]
-            except KeyError:
-                raise UnresolvableOperandError(operand)
+            raise UnresolvableOperandError(operand)
 
 
 def processOperand(repo, operand, stringify=False):
@@ -80,12 +83,9 @@ def processOperand(repo, operand, stringify=False):
     db = repo.database(subops[0])
 
     if oplevel == 1:
-        if stringify:
-            return db.tree()
-        else:
-            return db
+        return db.tree() if stringify else db
 
-    elif oplevel == 2:
+    if oplevel == 2:
         rs = {r.name: r for r in db.results()}
         out = []
         for k, v in rs.items():
@@ -95,5 +95,7 @@ def processOperand(repo, operand, stringify=False):
             out = '\n'.join([el.tree() for el in out])
         return out
 
-    elif oplevel == 3:
+    if oplevel == 3:
         return _processFullOperand(db, operand, subops)
+
+    raise UnresolvableOperandLevel(oplevel)

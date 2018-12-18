@@ -1,8 +1,5 @@
 [MASTER]
 
-# Temporary disable list
-disable=invalid-name,unused-wildcard-import,wildcard-import,unused-import,wrong-import-order,missing-docstring,no-self-use,unused-argument,unidiomatic-typecheck,too-many-branches,too-many-arguments,too-many-locals,len-as-condition,line-too-long,too-many-instance-attributes,too-few-public-methods
-
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code
@@ -395,7 +392,8 @@ good-names=i,
            k,
            ex,
            Run,
-           _
+           _,
+           db
 
 # Include a hint for the correct naming format with invalid-name
 include-naming-hint=no

@@ -14,12 +14,12 @@ class SourceFile(PMFile):
         super().__init__(*args, **kwargs)
         self.url = url
 
-    def _downloadFile(self):
+    def _download_file(self):
         """Download the file."""
-        targetPath = os.path.join(self.repo.downloadDir(), self.filename)
-        cmd = 'wget {} -O {}'.format(self.url, targetPath)
+        target_path = os.path.join(self.repo.download_dir(), self.filename)
+        cmd = 'wget {} -O {}'.format(self.url, target_path)
         check_output(cmd, shell=True)
-        return targetPath
+        return target_path
 
     def _resolver(self):
         """Return file url."""
@@ -27,4 +27,4 @@ class SourceFile(PMFile):
 
     def _resolve_actual_file(self):
         """Resolve file by downloading it."""
-        return self._downloadFile()
+        return self._download_file()

@@ -4,18 +4,18 @@ import os.path
 from .custom_errors import UnresolvableOperandError, UnresolvableOperandLevel
 
 
-def _filePrefix(fs):
+def _file_prefix(file_sources):
     out = ''
-    ls = [len(fpath) for fpath in fs.values()]
-    for i in range(min(ls)):
-        cs = [fpath[i] for fpath in fs.values()]
+    path_lengths = [len(fpath) for fpath in file_sources.values()]
+    for i in range(min(path_lengths)):
+        components = [fpath[i] for fpath in file_sources.values()]
         consensus = True
-        for j in range(len(cs) - 1):
-            if cs[j] != cs[j + 1]:
+        for j in range(len(components) - 1):
+            if components[j] != components[j + 1]:
                 consensus = False
                 break
         if consensus:
-            out += cs[0]
+            out += components[0]
         else:
             break
     if out[-1] == '.':
@@ -23,11 +23,11 @@ def _filePrefix(fs):
     return out
 
 
-def _fileDir(fs):
-    if len(fs) == 1:
-        return os.path.dirname(fs.values()[0])
+def _file_dir(file_sources):
+    if len(file_sources) == 1:
+        return os.path.dirname(file_sources.values()[0])
     sections = []
-    for path in fs.values():
+    for path in file_sources.values():
         for i, section in enumerate(path.split('/')):
             while len(sections) <= i:
                 sections.append([])
@@ -49,35 +49,35 @@ def _fileDir(fs):
     return fdir
 
 
-def _processFullOperand(db, operand, subops):
+def _process_full_operand(db, operand, subops):
     """
     Return a filepath based on <database>.<item>.<file>.
 
     should also accept 2 special commands for <file>: prefix and dir
     which return a shared <element> or fail if that does not exist.
     """
-    fs = {}
-    for r in db.results():
-        if r.name != '.'.join(subops[:2]):
+    file_sources = {}
+    for result in db.results():
+        if result.name != '.'.join(subops[:2]):
             continue
-        for _, f in r.files():
-            fs[f.name] = f.filepath()
+        for _, result_file in result.files():
+            file_sources[result_file.name] = result_file.filepath()
 
     if subops[2] == 'prefix':
-        return _filePrefix(fs)
+        return _file_prefix(file_sources)
     if subops[2] == 'dir':
-        return _fileDir(fs)
+        return _file_dir(file_sources)
 
     try:
-        return fs[subops[2]]
+        return file_sources[subops[2]]
     except KeyError:
         try:
-            return fs[operand]
+            return file_sources[operand]
         except KeyError:
             raise UnresolvableOperandError(operand)
 
 
-def processOperand(repo, operand, stringify=False):
+def process_operand(repo, operand, stringify=False):
     """Process a full PackageMega operand."""
     subops = operand.split('.')
     oplevel = len(subops)
@@ -87,16 +87,16 @@ def processOperand(repo, operand, stringify=False):
         return db.tree() if stringify else db
 
     if oplevel == 2:
-        rs = {r.name: r for r in db.results()}
+        results = {result.name: result for result in db.results()}
         out = []
-        for k, v in rs.items():
-            if str(k) == operand:
-                out.append(v)
+        for key, value in results.items():
+            if str(key) == operand:
+                out.append(value)
         if stringify:
-            out = '\n'.join([el.tree() for el in out])
+            out = '\n'.join([element.tree() for element in out])
         return out
 
     if oplevel == 3:
-        return _processFullOperand(db, operand, subops)
+        return _process_full_operand(db, operand, subops)
 
     raise UnresolvableOperandLevel(oplevel)

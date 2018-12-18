@@ -16,7 +16,7 @@ class PMFile:
         self.filename = filename
         self._filepath = None
 
-    def _askUserForFile(self):
+    def _ask_user_for_file(self):
         """Prompt user for existing file path."""
         _filepath = None
         msg = 'Is {} already on this system?'.format(self.filename)
@@ -35,12 +35,12 @@ class PMFile:
 
     def resolve(self):
         """Create file from subclass-specific resolver."""
-        actualFile = self._askUserForFile()
-        if actualFile is None and self._resolver() is not None:
-            actualFile = self._resolve_actual_file()
-        if actualFile is None:
+        actual_file = self._ask_user_for_file()
+        if actual_file is None and self._resolver() is not None:
+            actual_file = self._resolve_actual_file()
+        if actual_file is None:
             raise UnresolvableFileError()
-        self._filepath = os.path.abspath(actualFile)
+        self._filepath = os.path.abspath(actual_file)
 
     def filepath(self):
         """Expose private _filepath as read-only."""

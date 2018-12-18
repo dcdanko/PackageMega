@@ -1,8 +1,8 @@
 """Base PackageMega file class."""
 
-from gimme_input import UserInput, BoolUserInput
-from subprocess import check_output
 import os.path
+from gimme_input import UserInput, BoolUserInput
+
 from .custom_errors import UnresolvableFileError
 
 

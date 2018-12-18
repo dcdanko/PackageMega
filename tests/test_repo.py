@@ -1,7 +1,5 @@
 """Basic test suite for PackgeMega."""
 
-import os
-
 from packagemega import Repo
 
 

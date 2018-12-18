@@ -2,9 +2,7 @@
 
 import os.path
 from subprocess import check_output
-from gimme_input import UserInput, BoolUserInput
 
-from .custom_errors import UnresolvableFileError
 from .file import PMFile
 
 

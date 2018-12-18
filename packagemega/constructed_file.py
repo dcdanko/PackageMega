@@ -1,9 +1,5 @@
 """File subclass sourced from a constructor hook."""
 
-import os.path
-from gimme_input import UserInput, BoolUserInput
-
-from .custom_errors import UnresolvableFileError
 from .file import PMFile
 
 

@@ -195,7 +195,8 @@ class Repo:
         targetDir = os.path.join(targetDir, Repo.repoDirName)
         p = os.path.abspath(targetDir)
         try:
-            _ = ds.Repo.loadRepo(p)
+            # Ignore the return value
+            ds.Repo.loadRepo(p)
         except FileNotFoundError:
             Repo._initRepo()
             return Repo.loadRepo()

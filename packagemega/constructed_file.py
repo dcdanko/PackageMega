@@ -1,3 +1,4 @@
+"""File subclass sourced from a constructor hook."""
 
 import os.path
 from gimme_input import UserInput, BoolUserInput
@@ -7,8 +8,10 @@ from .file import PMFile
 
 
 class ConstructedFile(PMFile):
+    """File subclass sourced from a constructor hook."""
 
     def __init__(self, *args, hook=None, **kwargs):
+        """Initialize by storing the constructor hook."""
         super().__init__(*args, **kwargs)
         self.hook = hook
 

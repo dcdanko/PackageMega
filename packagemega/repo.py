@@ -13,14 +13,18 @@ from .custom_errors import RecipeNotFoundError, InvalidRecipeURI
 
 
 class Repo:
+    """PackageMega repository class."""
+
     repoDirName = '.package_mega'
 
     def __init__(self, abspath):
+        """Initialize with repository path."""
         self.abspath = abspath
         self.recipeDir = os.path.join(self.abspath, 'recipes')
         self.stagingDir = os.path.join(self.abspath, 'staging')
 
     def addRecipes(self, uri, dev=False):
+        """Add recipe(s) from URI."""
         if os.path.exists(uri):
             return self.addFromLocal(uri)
 
@@ -30,6 +34,7 @@ class Repo:
         raise InvalidRecipeURI(uri)
 
     def addFromLocal(self, uri, dev=False):
+        """Add recipe from local filepath."""
         if uri[-9:] == 'recipe.py':
             fs = [uri]
         else:
@@ -51,6 +56,7 @@ class Repo:
         return out
 
     def addFromGithub(self, uri):
+        """Add recipe from GitHub URI."""
         hname = uri.split('/')[-1].split('.')[0]
         dest = os.path.join(self.stagingDir, hname)
         cmd = 'git clone {} {}'.format(uri, dest)
@@ -67,6 +73,7 @@ class Repo:
         raise InvalidRecipeURI('{} is not a recipe'.format(recipeFilename))
 
     def allRecipes(self):
+        """Return set containing names of all recipes in repository."""
         out = set()
         for recipe in listdir(self.recipeDir):
             try:
@@ -77,6 +84,7 @@ class Repo:
         return out
 
     def makeRecipe(self, recipeName):
+        """Create a recipe from the recipe name."""
         # check if we have the recipe
         # if not throw an error
         if recipeName not in self.allRecipes():
@@ -115,6 +123,7 @@ class Repo:
         return cname
 
     def downloadDir(self):
+        """Get directory for storing PackageMega downloads."""
         try:
             return os.environ['PACKAGE_MEGA_DOWNLOADS']
         except KeyError:
@@ -128,18 +137,22 @@ class Repo:
                 return defaultDatabaseDir
 
     def allDatabases(self):
+        """Return list of all databases present in the repository."""
         out = []
         for database in self.dsRepo().sampleTable.getAll():
             out.append(database)
         return out
 
     def database(self, databaseName):
+        """Get database by name."""
         return self.dsRepo().sampleTable.get(databaseName)
 
     def dbStatus(self):
+        """Get status of underlying DataSuper repository."""
         return self.dsRepo().checkStatus()
 
     def saveFiles(self, recipe, subName, *filepaths, **kwFilepaths):
+        """Save a group of files to a recipe using the subName suffix."""
         fs = {}
         for i, filepath in enumerate(filepaths):
             fs[i] = filepath
@@ -169,10 +182,12 @@ class Repo:
             sample.addResult(result).save(modify=True)
 
     def dsRepo(self):
+        """Return the underlying DataSuper repository."""
         return ds.Repo.loadRepo(self.abspath)
 
     @staticmethod
     def loadRepo():
+        """Load the system-wide PackageMega repository."""
         try:
             targetDir = os.environ['PACKAGE_MEGA_HOME']
         except KeyError:
@@ -205,6 +220,7 @@ class Repo:
 
 
 def dictify(el):
+    """Transform element of any type into dictionary."""
     if type(el) == list:
         return {i: sub for i, sub in enumerate(el)}
     if type(el) == dict:

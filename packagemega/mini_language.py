@@ -1,4 +1,4 @@
-
+"""Filepath support for PackageMega naming convention."""
 
 import os.path
 from .custom_errors import UnresolvableOperandError, UnresolvableOperandLevel
@@ -51,10 +51,10 @@ def _fileDir(fs):
 
 def _processFullOperand(db, operand, subops):
     """
-    Returns a filepath based on <database>.<item>.<file>
+    Return a filepath based on <database>.<item>.<file>.
 
     should also accept 2 special commands for <file>: prefix and dir
-    which return a shared <element> or fail if that does not exist
+    which return a shared <element> or fail if that does not exist.
     """
     fs = {}
     for r in db.results():
@@ -78,6 +78,7 @@ def _processFullOperand(db, operand, subops):
 
 
 def processOperand(repo, operand, stringify=False):
+    """Process a full PackageMega operand."""
     subops = operand.split('.')
     oplevel = len(subops)
     db = repo.database(subops[0])

@@ -7,14 +7,17 @@ from .custom_errors import UnresolvableFileError
 
 
 class PMFile:
+    """Base PackageMega file class."""
 
     def __init__(self, repo, filename, *args, **kwargs):
+        """Initialze PMFile with repo and filename this file is to resolve to."""
         super().__init__(*args, **kwargs)
         self.repo = repo
         self.filename = filename
         self._filepath = None
 
     def _askUserForFile(self):
+        """Prompt user for existing file path."""
         _filepath = None
         msg = 'Is {} already on this system?'.format(self.filename)
         if self._resolver() is None or BoolUserInput(msg, False).resolve():
@@ -31,6 +34,7 @@ class PMFile:
         raise NotImplementedError()
 
     def resolve(self):
+        """Create file from subclass-specific resolver."""
         actualFile = self._askUserForFile()
         if actualFile is None and self._resolver() is not None:
             actualFile = self._resolve_actual_file()
@@ -39,4 +43,5 @@ class PMFile:
         self._filepath = os.path.abspath(actualFile)
 
     def filepath(self):
+        """Expose private _filepath as read-only."""
         return self._filepath

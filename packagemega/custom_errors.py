@@ -2,20 +2,20 @@
 
 
 class UnresolvableOperandError(Exception):
-    pass
+    """Raised when database operand cannot be resolved."""
 
 
 class UnresolvableOperandLevel(Exception):
-    pass
+    """Raised when too many operand levels are supplied."""
 
 
 class UnresolvableFileError(Exception):
-    pass
+    """Raised when a file source cannot be resolved."""
 
 
 class RecipeNotFoundError(Exception):
-    pass
+    """Raised when a missing recipe is requested."""
 
 
 class InvalidRecipeURI(Exception):
-    pass
+    """Raised when an invalid recipe URI is supplied."""

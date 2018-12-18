@@ -18,7 +18,7 @@ with open(version_path) as version_file:
 @click.group()
 @click.version_option(version['__version__'])
 def main():
-    pass
+    """Enter PackageMega CLI."""
 
 
 ###############################################################################
@@ -38,6 +38,7 @@ def tableStatus(tblName, statusMap):
 
 @main.command(name='status')
 def pm_status():
+    """Print PackageMega repository status report to stdout."""
     repo = Repo.loadRepo()
     sys.stdout.write('Checking status')
     for tblName, statusMap in repo.dbStatus().items():
@@ -52,6 +53,7 @@ def pm_status():
               help='Install recipe with symlinks')
 @click.argument('uri')
 def add(dev, uri):
+    """Add URI to PackageMega repository."""
     repo = Repo.loadRepo()
     repo.addFromLocal(uri, dev=dev)
 
@@ -61,6 +63,7 @@ def add(dev, uri):
 @main.command()
 @click.argument('name')
 def install(name):
+    """Install PackageMega recipe."""
     repo = Repo.loadRepo()
     repo.makeRecipe(name)
 
@@ -69,11 +72,12 @@ def install(name):
 
 @main.group()
 def view():
-    pass
+    """Enter group of PackageMega view commands."""
 
 
 @main.command(name='recipe')
 def viewRecipes():
+    """View all recipes present in PackageMega repository."""
     repo = Repo.loadRepo()
     for recipe in repo.allRecipes():
         print(recipe)
@@ -82,6 +86,7 @@ def viewRecipes():
 
 
 def printAllDatabases(repo):
+    """Print the name of all databased present in repository."""
     for db in repo.allDatabases():
         print(db.name)
 
@@ -89,6 +94,7 @@ def printAllDatabases(repo):
 @main.command(name='database')
 @click.argument('operands', nargs=-1)
 def viewDatabase(operands):
+    """Print database names filtered by operand arguments."""
     repo = Repo.loadRepo()
     if len(operands) == 0:
         printAllDatabases(repo)

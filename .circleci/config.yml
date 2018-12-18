@@ -15,9 +15,7 @@ jobs:
       - run:
           name: Lint code (non-fatal)
           command: |
-            set +e
             tox -e flake8,pylint
-            exit 0
 
       - run:
           name: Run tox

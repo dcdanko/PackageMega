@@ -22,7 +22,7 @@ requirements = [
     'DataSuper~=0.10.0',
     'gimme_input~=1.0.0',
     'PyYAML==3.12',  # pinned version required by yaml_backed_structs
-    'yaml_backed_structs~=0.9.0',
+    'yaml_backed_structs~=1.0.0',
 ]
 
 

@@ -1,32 +1,20 @@
-from gimme_input import UserInput, BoolUserInput
-from .custom_errors import UnresolvableFileError
-import os.path
+"""File subclass sourced from a constructor hook."""
 
-class ConstructedFile:
+from .file import PMFile
 
-    def __init__(self, repo, filename, *args):
-        self.filename = filename
-        self.hook = None
-        if len(args) > 0:
-            self.hook = args[0]
-        self._filepath = None
-        self.repo = repo
 
-    def _askUserForFile(self):
-        _filepath = None
-        msg = 'Is {} already on this system?'.format(self.filename)
-        if self.hook is None or BoolUserInput(msg, False).resolve():
-            msg = 'Please indicate where {} is stored'.format(self.filename)
-            _filepath = UserInput(msg).resolve()
-        return _filepath
+class ConstructedFile(PMFile):
+    """File subclass sourced from a constructor hook."""
 
-    def resolve(self):
-        actualFile = self._askUserForFile()
-        if actualFile is None and self.hook is not None:
-            actualFile = self.hook()
-        if actualFile is None:
-            raise UnresolvableFileError()
-        self._filepath = os.path.abspath(actualFile)
+    def __init__(self, *args, hook=None, **kwargs):
+        """Initialize by storing the constructor hook."""
+        super().__init__(*args, **kwargs)
+        self.hook = hook
 
-    def filepath(self):
-        return self._filepath
+    def _resolver(self):
+        """Return constructor hook."""
+        return self.hook
+
+    def _resolve_actual_file(self):
+        """Resolve file by calling hook."""
+        return self.hook()

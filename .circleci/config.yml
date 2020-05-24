@@ -13,11 +13,9 @@ jobs:
       - checkout
 
       - run:
-          name: Lint code (non-fatal)
+          name: Lint code
           command: |
-            set +e
             tox -e flake8,pylint
-            exit 0
 
       - run:
           name: Run tox
